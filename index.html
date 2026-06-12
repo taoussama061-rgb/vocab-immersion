@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VocabImmersion — La France dans chaque mot</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   FRENCH PALETTE
+   Bleu: #002395  Rouge: #ED2939  Blanc: #FFFFFF
+   Gold: #C9A84C  Cream: #FDF8F0  Dark: #0D0D1A
+══════════════════════════════════════════ */
+:root {
+  --bleu:    #002395;
+  --rouge:   #ED2939;
+  --blanc:   #FFFFFF;
+  --gold:    #C9A84C;
+  --gold-lt: #F5E6C0;
+  --cream:   #FDF8F0;
+  --dark:    #0D0D1A;
+  --ink:     #1a1a2e;
+  --muted:   #6b6b8a;
+  --border:  #E8E0D0;
+  --card:    rgba(255,255,255,0.92);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family:'DM Sans',sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ══ FRENCH BACKGROUND CANVAS ══ */
+#bgCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.06;
+}
+
+/* ══ TRICOLOR TOP BAR ══ */
+.tricolor-bar {
+  height: 5px;
+  background: linear-gradient(90deg, var(--bleu) 33.3%, var(--blanc) 33.3% 66.6%, var(--rouge) 66.6%);
+  position: sticky; top: 0; z-index: 200;
+}
+
+/* ══ HEADER ══ */
+header {
+  position: sticky; top: 5px; z-index: 100;
+  padding: 0 28px;
+  height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(253,248,240,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(201,168,76,0.3);
+  box-shadow: 0 2px 24px rgba(0,35,149,0.06);
+}
+
+.logo-wrap { display:flex; align-items:center; gap:12px; }
+
+.logo-flag {
+  display: flex; border-radius: 6px; overflow: hidden;
+  width: 28px; height: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.flag-b { background:var(--bleu); flex:1; }
+.flag-w { background:var(--blanc); flex:1; border-left:1px solid #ddd; border-right:1px solid #ddd; }
+.flag-r { background:var(--rouge); flex:1; }
+
+.logo-text {
+  font-family:'Playfair Display',serif;
+  font-weight:900; font-size:1.45rem;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+.logo-text em { color:var(--bleu); font-style:normal; }
+.logo-text strong { color:var(--rouge); font-weight:900; }
+
+.logo-sub { font-size:0.68rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-top:1px; }
+
+.header-right { display:flex; align-items:center; gap:10px; }
+
+.lib-btn {
+  display:flex; align-items:center; gap:7px;
+  padding:8px 16px;
+  background: var(--blanc);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.82rem;
+  cursor: pointer; color: var(--ink);
+  transition: all 0.2s;
+}
+.lib-btn:hover { border-color:var(--bleu); background:rgba(0,35,149,0.04); }
+.lib-badge {
+  background: var(--bleu); color:white;
+  border-radius:20px; padding:1px 8px; font-size:0.68rem; font-weight:700;
+}
+
+/* ══ LEVEL INDICATOR ══ */
+.level-strip {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:10px 20px 6px;
+  position: relative; z-index:1;
+}
+.level-pill {
+  padding:4px 14px; border-radius:20px; font-size:0.72rem; font-weight:600;
+  letter-spacing:0.04em; cursor:pointer; transition:all 0.2s;
+  border: 1.5px solid transparent;
+  background: rgba(255,255,255,0.6);
+  color: var(--muted);
+}
+.level-pill.active-a1 { background:var(--bleu); color:white; border-color:var(--bleu); }
+.level-pill.active-a2 { background:#1a6eb5; color:white; border-color:#1a6eb5; }
+.level-pill.active-b1 { background:var(--gold); color:white; border-color:var(--gold); }
+.level-pill.active-b2 { background:#c0812a; color:white; border-color:#c0812a; }
+.level-pill.active-c1 { background:var(--rouge); color:white; border-color:var(--rouge); }
+.level-pill.active-c2 { background:#8b0000; color:white; border-color:#8b0000; }
+
+/* ══ MAIN ══ */
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 20px 100px;
+  position: relative; z-index:1;
+}
+
+/* ══ SEARCH HERO ══ */
+.search-hero {
+  text-align: center;
+  margin-bottom: 36px;
+  padding: 48px 24px 40px;
+  background: linear-gradient(135deg, rgba(0,35,149,0.04) 0%, rgba(237,41,57,0.03) 100%);
+  border-radius: 28px;
+  border: 1px solid rgba(201,168,76,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-hero::before {
+  content: '🇫🇷';
+  position:absolute; top:-10px; right:20px;
+  font-size:5rem; opacity:0.07; pointer-events:none;
+}
+
+.hero-eyebrow {
+  font-size:0.72rem; color:var(--rouge); font-weight:700;
+  letter-spacing:0.12em; text-transform:uppercase; margin-bottom:12px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after { content:'✦'; font-size:0.6rem; }
+
+.hero-title {
+  font-family:'Playfair Display',serif;
+  font-size:2.6rem; font-weight:900; line-height:1.1;
+  color: var(--ink); margin-bottom:8px;
+}
+.hero-title .fr-word { color:var(--bleu); }
+.hero-title .ar-word { color:var(--rouge); }
+
+.hero-sub {
+  font-size:0.9rem; color:var(--muted); margin-bottom:28px; line-height:1.6;
+}
+
+.search-bar {
+  display:flex; gap:10px; max-width:520px; margin:0 auto 16px;
+}
+
+.s-input {
+  flex:1; padding:15px 20px;
+  border: 2px solid var(--border);
+  border-radius: 14px; font-size:1rem;
+  font-family:'DM Sans',sans-serif;
+  background: white;
+  outline:none; transition: border-color 0.2s, box-shadow 0.2s;
+  color: var(--ink);
+}
+.s-input:focus {
+  border-color: var(--bleu);
+  box-shadow: 0 0 0 4px rgba(0,35,149,0.08);
+}
+
+.s-btn {
+  padding:15px 26px;
+  background: linear-gradient(135deg, var(--bleu), #1a3fa8);
+  color:white; border:none; border-radius:14px;
+  font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem;
+  cursor:pointer; transition:all 0.2s; white-space:nowrap;
+  box-shadow: 0 4px 20px rgba(0,35,149,0.3);
+}
+.s-btn:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(0,35,149,0.4); }
+.s-btn:active { transform:translateY(0); }
+.s-btn:disabled { background:#aaa; box-shadow:none; cursor:not-allowed; transform:none; }
+
+.quick-words {
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+  margin-top:14px; align-items:center;
+}
+.quick-label { font-size:0.75rem; color:var(--muted); }
+.qw-btn {
+  background:white; border:1.5px solid var(--border); border-radius:20px;
+  padding:5px 14px; font-size:0.82rem; cursor:pointer; color:var(--ink);
+  font-family:'DM Sans',sans-serif; transition:all 0.15s;
+}
+.qw-btn:hover { border-color:var(--bleu); color:var(--bleu); background:rgba(0,35,149,0.04); }
+
+/* ══ REVIEW BANNER ══ */
+.review-banner {
+  display:none; background:linear-gradient(135deg,#FFF9E6,#FEF0C0);
+  border:1.5px solid var(--gold); border-radius:14px;
+  padding:14px 18px; margin-bottom:20px;
+  align-items:center; gap:12px; position:relative; z-index:1;
+}
+.review-banner.show { display:flex; }
+.rb-icon { font-size:1.6rem; }
+.rb-text { flex:1; font-size:0.87rem; }
+.rb-text strong { font-family:'Syne',sans-serif; font-size:0.93rem; color:var(--ink); }
+.rb-btn {
+  background:var(--gold); color:white; border:none; border-radius:10px;
+  padding:8px 16px; font-family:'Syne',sans-serif; font-weight:700;
+  font-size:0.8rem; cursor:pointer; white-space:nowrap;
+}
+
+/* ══ STATUS ══ */
+.err-msg {
+  background:#FFF0F0; border:1.5px solid #fca5a5; border-radius:12px;
+  padding:14px 18px; color:#b91c1c; font-size:0.88rem; display:none; margin-bottom:16px;
+  position:relative; z-index:1;
+}
+.err-msg.show { display:block; }
+
+.loading {
+  display:none; text-align:center; padding:64px 0; position:relative; z-index:1;
+}
+.loading.show { display:block; }
+
+.spin-wrap { position:relative; width:56px; height:56px; margin:0 auto 20px; }
+.spin-ring {
+  width:56px; height:56px; border-radius:50%;
+  border:3px solid var(--border);
+  border-top-color:var(--bleu); border-right-color:var(--rouge);
+  animation:spin 1s linear infinite;
+  position:absolute;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.spin-flag { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.4rem; }
+.loading-txt { font-family:'Playfair Display',serif; font-size:1rem; color:var(--muted); }
+
+/* ══ RESULT ══ */
+.result { display:none; position:relative; z-index:1; }
+.result.show { display:block; }
+
+/* ══ WORD HERO CARD ══ */
+.word-hero {
+  border-radius:24px; overflow:hidden; margin-bottom:16px;
+  box-shadow: 0 8px 40px rgba(0,35,149,0.12);
+  position:relative;
+}
+.wh-top {
+  background: linear-gradient(135deg, var(--bleu) 0%, #1a3fa8 50%, #002080 100%);
+  padding:36px 32px 28px;
+  color:white; position:relative; overflow:hidden;
+}
+.wh-top::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:220px; height:220px; border-radius:50%;
+  background:radial-gradient(circle, rgba(201,168,76,0.3), transparent 70%);
+}
+.wh-top::after {
+  content:'🗼'; position:absolute; bottom:-10px; right:24px;
+  font-size:5rem; opacity:0.08;
+}
+
+.wh-main { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.wh-left {}
+.word-title {
+  font-family:'Playfair Display',serif;
+  font-size:3.2rem; font-weight:900; letter-spacing:-1px; line-height:1;
+  margin-bottom:6px;
+}
+.word-ipa { font-size:1rem; color:rgba(201,168,76,0.9); margin-bottom:12px; font-style:italic; }
+.word-cat {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.2);
+  border-radius:8px; padding:4px 12px; font-size:0.75rem; letter-spacing:0.06em; text-transform:uppercase;
+}
+
+.wh-right { display:flex; flex-direction:column; gap:10px; align-items:flex-end; flex-shrink:0; }
+
+.speak-btn {
+  width:50px; height:50px; border-radius:50%;
+  background:rgba(255,255,255,0.12); border:2px solid rgba(255,255,255,0.25);
+  color:white; font-size:1.3rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.2s;
+}
+.speak-btn:hover { background:rgba(255,255,255,0.25); transform:scale(1.05); }
+
+.mastery-box {
+  background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+  border-radius:12px; padding:10px 14px; text-align:center; min-width:80px;
+}
+.mastery-pct { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; color:var(--gold); }
+.mastery-lbl { font-size:0.62rem; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.06em; }
+
+/* ══ MASTERY BAR ══ */
+.wh-bottom {
+  background: linear-gradient(135deg, #001a6e, #001060);
+  padding:16px 32px;
+}
+.mb-track { background:rgba(255,255,255,0.1); border-radius:6px; height:7px; margin-bottom:6px; overflow:hidden; }
+.mb-fill {
+  height:7px; border-radius:6px; transition:width 0.8s cubic-bezier(.4,0,.2,1);
+  background: linear-gradient(90deg, var(--gold), #f0c040);
+}
+.mb-labels { display:flex; justify-content:space-between; font-size:0.65rem; color:rgba(255,255,255,0.3); }
+
+/* ══ LEVEL TAG ══ */
+.level-tag {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 10px; border-radius:6px; font-size:0.72rem; font-weight:700;
+  margin-left:10px; vertical-align:middle;
+}
+
+/* ══ STEPS GRID ══ */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.full { grid-column:1/-1; }
+@media(max-width:520px){ .grid2 { grid-template-columns:1fr; } }
+
+.step-card {
+  background:var(--card);
+  backdrop-filter:blur(10px);
+  border-radius:18px;
+  border:1px solid rgba(201,168,76,0.15);
+  padding:22px 20px;
+  box-shadow:0 2px 16px rgba(0,0,0,0.04);
+  transition:box-shadow 0.2s;
+}
+.step-card:hover { box-shadow:0 4px 28px rgba(0,35,149,0.08); }
+
+.step-head {
+  display:flex; align-items:center; gap:8px; margin-bottom:12px;
+}
+.step-num {
+  width:26px; height:26px; border-radius:8px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-weight:800; font-size:0.75rem; color:white;
+}
+.n1 { background:var(--rouge); }
+.n2 { background:var(--bleu); }
+.n3 { background:var(--gold); }
+.n4 { background:#1a5c3a; }
+.n5 { background:#7c3aed; }
+.n6 { background:#c2185b; }
+
+.step-label { font-size:0.68rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+
+.step-title {
+  font-family:'Playfair Display',serif;
+  font-size:1.05rem; font-weight:700; color:var(--ink); margin-bottom:10px;
+}
+
+.step-body { font-size:0.89rem; line-height:1.7; color:#333; }
+
+/* tags */
+.tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.tag { padding:3px 11px; border-radius:20px; font-size:0.8rem; font-weight:500; }
+.tag-syn { background:rgba(0,35,149,0.08); color:var(--bleu); border:1px solid rgba(0,35,149,0.15); }
+.tag-ant { background:rgba(237,41,57,0.08); color:var(--rouge); border:1px solid rgba(237,41,57,0.15); }
+
+/* collocations */
+.colloc-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid rgba(201,168,76,0.15); font-size:0.87rem;
+  gap:12px;
+}
+.colloc-row:last-child { border-bottom:none; }
+.cf { font-weight:600; color:var(--ink); }
+.ca { color:var(--muted); font-size:0.8rem; direction:rtl; text-align:right; }
+
+/* story */
+.story-box {
+  background:linear-gradient(135deg, rgba(0,35,149,0.03), rgba(237,41,57,0.02));
+  border:1px solid rgba(201,168,76,0.2);
+  border-radius:12px; padding:16px 18px;
+  font-size:0.9rem; line-height:1.8; color:#1a1a2e;
+}
+.story-word {
+  background:linear-gradient(120deg, rgba(0,35,149,0.15), rgba(0,35,149,0.1));
+  color:var(--bleu); font-weight:700; border-radius:5px; padding:1px 5px;
+  border-bottom:2px solid var(--bleu);
+}
+.story-note { font-size:0.78rem; color:var(--muted); margin-top:10px; font-style:italic; }
+
+/* example */
+.ex-quote {
+  font-style:italic; padding:12px 16px;
+  background:rgba(28,62,25,0.05);
+  border-left:3px solid #1a5c3a; border-radius:0 10px 10px 0;
+  font-size:0.9rem; line-height:1.65; margin-bottom:8px;
+}
+.ex-note { font-size:0.78rem; color:var(--muted); }
+
+/* ══ QUIZ ══ */
+.quiz-q { font-size:0.9rem; font-weight:600; color:var(--ink); margin-bottom:14px; line-height:1.5; }
+.q-opts { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.q-opt {
+  background:white; border:1.5px solid var(--border); border-radius:11px;
+  padding:11px 14px; font-size:0.84rem; cursor:pointer;
+  font-family:'DM Sans',sans-serif; color:var(--ink); text-align:left;
+  transition:all 0.15s;
+}
+.q-opt:hover:not(:disabled) { border-color:var(--bleu); background:rgba(0,35,149,0.04); }
+.q-opt.ok { background:#dcfce7; border-color:#16a34a; color:#14532d; font-weight:600; }
+.q-opt.no { background:#fee2e2; border-color:var(--rouge); color:#7f1d1d; }
+.q-opt:disabled { cursor:default; }
+.q-fb {
+  margin-top:10px; padding:10px 14px; border-radius:10px; font-size:0.85rem;
+  display:none; font-weight:500;
+}
+.q-fb.ok { background:#dcfce7; color:#15803d; display:block; }
+.q-fb.no { background:#fee2e2; color:var(--rouge); display:block; }
+.q-next {
+  margin-top:10px; padding:9px 20px;
+  background:linear-gradient(135deg,var(--bleu),#1a3fa8); color:white; border:none;
+  border-radius:10px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.84rem;
+  cursor:pointer; display:none; box-shadow:0 3px 12px rgba(0,35,149,0.25);
+}
+.q-next.show { display:inline-block; }
+.q-score { font-size:0.78rem; color:var(--muted); margin-top:8px; }
+
+/* ══ MEMORY CARD ══ */
+.memory-card {
+  background:linear-gradient(135deg,#fffbf0,#fef3c7);
+  border:1.5px solid var(--gold); border-radius:18px;
+  padding:22px 20px; margin-bottom:14px;
+  position:relative; overflow:hidden;
+}
+.memory-card::after { content:'✦'; position:absolute; top:16px; right:20px; font-size:1.5rem; color:var(--gold); opacity:0.4; }
+.mem-head { font-size:0.72rem; color:var(--gold); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px; }
+.mem-tip {
+  font-family:'Playfair Display',serif;
+  font-size:1rem; font-style:italic; line-height:1.65;
+  padding-left:14px; border-left:3px solid var(--gold);
+  color:var(--ink); margin-bottom:10px;
+}
+.mem-anchor { font-size:0.8rem; color:#8b6914; display:flex; align-items:center; gap:6px; }
+.mem-anchor::before { content:'⚓'; }
+
+/* ══ GOOGLE IMAGES LINK ══ */
+.g-img-link {
+  display:flex; align-items:center; gap:8px; margin-top:12px;
+  padding:9px 14px; background:rgba(0,35,149,0.06);
+  border:1px solid rgba(0,35,149,0.15); border-radius:10px;
+  text-decoration:none; color:var(--bleu); font-size:0.82rem; font-weight:600;
+  transition:all 0.2s;
+}
+.g-img-link:hover { background:rgba(0,35,149,0.12); }
+
+/* ══ SAVE BUTTON ══ */
+.save-wrap { display:flex; justify-content:center; margin-bottom:20px; }
+.save-btn {
+  display:flex; align-items:center; gap:9px; padding:13px 32px;
+  background:white; border:2px solid var(--border); border-radius:14px;
+  font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem;
+  cursor:pointer; color:var(--ink); transition:all 0.2s;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+.save-btn:hover { border-color:var(--bleu); color:var(--bleu); background:rgba(0,35,149,0.04); transform:translateY(-1px); }
+.save-btn.saved { background:var(--bleu); color:white; border-color:var(--bleu); }
+
+/* ══ LIBRARY PANEL ══ */
+.overlay { display:none; position:fixed; inset:0; background:rgba(10,10,26,0.45); z-index:300; backdrop-filter:blur(3px); }
+.overlay.open { display:block; }
+
+.lib-panel {
+  display:none; position:fixed; top:0; right:0; width:360px; height:100vh;
+  background:var(--cream); z-index:400;
+  box-shadow:-8px 0 40px rgba(0,35,149,0.12);
+  flex-direction:column; overflow:hidden;
+  border-left:1px solid rgba(201,168,76,0.3);
+}
+.lib-panel.open { display:flex; }
+
+.lib-top-bar {
+  height:5px;
+  background:linear-gradient(90deg, var(--bleu) 33.3%, white 33.3% 66.6%, var(--rouge) 66.6%);
+}
+.lib-header {
+  padding:20px 20px 16px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.lib-title { font-family:'Playfair Display',serif; font-weight:700; font-size:1.15rem; }
+.lib-close { background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--muted); line-height:1; }
+.lib-body { flex:1; overflow-y:auto; padding:16px; }
+.lib-empty { text-align:center; padding:48px 20px; color:var(--muted); font-size:0.88rem; line-height:1.6; }
+.lib-empty .big-icon { font-size:3rem; display:block; margin-bottom:12px; }
+
+.lib-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; border:1.5px solid var(--border); border-radius:13px;
+  margin-bottom:8px; cursor:pointer; transition:all 0.15s; background:white;
+}
+.lib-item:hover { border-color:var(--bleu); box-shadow:0 2px 12px rgba(0,35,149,0.08); }
+.li-word { font-family:'Playfair Display',serif; font-weight:700; font-size:1.05rem; }
+.li-def { font-size:0.76rem; color:var(--muted); margin-top:2px; }
+.li-due { font-size:0.68rem; background:#fef3c7; color:#b45309; border-radius:6px; padding:2px 7px; font-weight:600; margin-top:3px; display:inline-block; }
+
+.mastery-pill {
+  padding:4px 10px; border-radius:20px; font-size:0.74rem; font-weight:700; white-space:nowrap; margin-left:8px;
+}
+.mp-low { background:#fee2e2; color:var(--rouge); }
+.mp-mid { background:#fef3c7; color:#b45309; }
+.mp-high { background:#dcfce7; color:#15803d; }
+
+.lib-review-btn {
+  margin:0 16px 16px; padding:13px;
+  background:linear-gradient(135deg,var(--bleu),#1a3fa8); color:white;
+  border:none; border-radius:13px; font-family:'Syne',sans-serif; font-weight:700;
+  font-size:0.88rem; cursor:pointer; width:calc(100% - 32px);
+  box-shadow:0 4px 16px rgba(0,35,149,0.25);
+}
+
+/* ══ FRENCH SYMBOLS BG (SVG via canvas) ══ */
+</style>
+</head>
+<body>
+
+<!-- BG CANVAS -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeLib()"></div>
+
+<!-- LIBRARY PANEL -->
+<div class="lib-panel" id="libPanel">
+  <div class="lib-top-bar"></div>
+  <div class="lib-header">
+    <div class="lib-title">📚 Ma Bibliothèque</div>
+    <button class="lib-close" onclick="closeLib()">×</button>
+  </div>
+  <div class="lib-body" id="libBody">
+    <div class="lib-empty" id="libEmpty">
+      <span class="big-icon">🗼</span>
+      لا توجد كلمات محفوظة بعد.<br>ابدأ بتحليل كلمة وأحفظها في مكتبتك!
+    </div>
+  </div>
+  <button class="lib-review-btn" id="libReviewBtn" onclick="reviewDue()" style="display:none;">
+    🔄 مراجعة الكلمات المستحقة
+  </button>
+</div>
+
+<!-- TRICOLOR TOP BAR -->
+<div class="tricolor-bar"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-wrap">
+    <div class="logo-flag"><div class="flag-b"></div><div class="flag-w"></div><div class="flag-r"></div></div>
+    <div>
+      <div class="logo-text"><em>Vocab</em><strong>Immersion</strong></div>
+      <div class="logo-sub">طريقة الانغماس الشامل</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="lib-btn" onclick="openLib()">
+      📚 Bibliothèque <span class="lib-badge" id="libCount">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- LEVEL STRIP -->
+<div class="level-strip">
+  <button class="level-pill active-a1" data-level="A1" onclick="setLevel('A1',this)">A1</button>
+  <button class="level-pill" data-level="A2" onclick="setLevel('A2',this)">A2</button>
+  <button class="level-pill" data-level="B1" onclick="setLevel('B1',this)">B1</button>
+  <button class="level-pill" data-level="B2" onclick="setLevel('B2',this)">B2</button>
+  <button class="level-pill" data-level="C1" onclick="setLevel('C1',this)">C1</button>
+  <button class="level-pill" data-level="C2" onclick="setLevel('C2',this)">C2</button>
+</div>
+
+<main>
+
+  <!-- REVIEW BANNER -->
+  <div class="review-banner" id="reviewBanner">
+    <div class="rb-icon">⏰</div>
+    <div class="rb-text"><strong id="rbText">لديك كلمات تحتاج مراجعة!</strong><br><span style="color:var(--muted);font-size:0.8rem;">منحنى النسيان — Courbe d'Ebbinghaus</span></div>
+    <button class="rb-btn" onclick="openLib()">راجع الآن</button>
+  </div>
+
+  <!-- SEARCH HERO -->
+  <section class="search-hero">
+    <div class="hero-eyebrow">La méthode d'immersion totale</div>
+    <h1 class="hero-title">
+      <span class="fr-word">Apprenez</span> le français<br>
+      <span class="ar-word">بطريقة صحيحة</span>
+    </h1>
+    <p class="hero-sub">صورة · تعريف · متلازمات · قصة · اختبار · مراجعة ذكية</p>
+    <div class="search-bar">
+      <input class="s-input" id="wordInput" type="text" placeholder="Entrez un mot français… ex: réussir" autocomplete="off"/>
+      <button class="s-btn" id="searchBtn" onclick="go()">Analyser →</button>
+    </div>
+    <div class="quick-words">
+      <span class="quick-label">Essayez :</span>
+      <button class="qw-btn" onclick="qs('réussir')">réussir</button>
+      <button class="qw-btn" onclick="qs('confiance')">confiance</button>
+      <button class="qw-btn" onclick="qs('ambition')">ambition</button>
+      <button class="qw-btn" onclick="qs('gérer')">gérer</button>
+      <button class="qw-btn" onclick="qs('défi')">défi</button>
+    </div>
+  </section>
+
+  <!-- ERRORS / LOADING -->
+  <div class="err-msg" id="errMsg"></div>
+  <div class="loading" id="loading">
+    <div class="spin-wrap">
+      <div class="spin-ring"></div>
+      <div class="spin-flag">🇫🇷</div>
+    </div>
+    <div class="loading-txt" id="loadingTxt">Analyse en cours…</div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result" id="result">
+
+    <!-- WORD HERO -->
+    <div class="word-hero">
+      <div class="wh-top">
+        <div class="wh-main">
+          <div class="wh-left">
+            <div class="word-title" id="wTitle"></div>
+            <div class="word-ipa" id="wIpa"></div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="word-cat" id="wCat"></span>
+              <span class="level-tag" id="wLevel"></span>
+            </div>
+          </div>
+          <div class="wh-right">
+            <button class="speak-btn" id="speakBtn">🔊</button>
+            <div class="mastery-box">
+              <div class="mastery-pct" id="mastPct">0%</div>
+              <div class="mastery-lbl">Maîtrise</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="wh-bottom">
+        <div class="mb-track"><div class="mb-fill" id="mastBar" style="width:0%"></div></div>
+        <div class="mb-labels">
+          <span>Débutant</span><span>Intermédiaire</span><span>Avancé</span><span>Expert</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEPS -->
+    <div class="grid2">
+
+      <!-- 1: VISUAL -->
+      <div class="step-card">
+        <div class="step-head"><div class="step-num n1">1</div><div class="step-label">Visuel & Son</div></div>
+        <div class="step-title">الصورة الذهنية</div>
+        <div class="step-body" id="s1"></div>
+        <a class="g-img-link" id="imgLink" href="#" target="_blank">🔍 <span id="imgTxt">Voir sur Google Images</span></a>
+      </div>
+
+      <!-- 2: DEFINITION -->
+      <div class="step-card">
+        <div class="step-head"><div class="step-num n2">2</div><div class="step-label">Définition</div></div>
+        <div class="step-title">Larousse Style</div>
+        <div class="step-body">
+          <div id="s2def" style="margin-bottom:10px;"></div>
+          <div style="font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:0.04em;margin-bottom:4px;">SYNONYMES</div>
+          <div class="tags" id="synTags"></div>
+          <div id="antBlock" style="margin-top:10px;">
+            <div style="font-size:0.72rem;color:var(--muted);font-weight:700;letter-spacing:0.04em;margin-bottom:4px;">ANTONYMES</div>
+            <div class="tags" id="antTags"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3: COLLOCATIONS -->
+      <div class="step-card">
+        <div class="step-head"><div class="step-num n3">3</div><div class="step-label">Collocations</div></div>
+        <div class="step-title">الكلمات المرافقة</div>
+        <div id="s3"></div>
+      </div>
+
+      <!-- 4: EXAMPLE -->
+      <div class="step-card">
+        <div class="step-head"><div class="step-num n4">4</div><div class="step-label">Exemple Personnel</div></div>
+        <div class="step-title">في حياتك الحقيقية</div>
+        <div class="step-body" id="s4"></div>
+      </div>
+
+      <!-- 5: STORY -->
+      <div class="step-card full">
+        <div class="step-head"><div class="step-num n5">5</div><div class="step-label">Mini Histoire 🆕</div></div>
+        <div class="step-title">الكلمة في قصة قصيرة</div>
+        <div class="story-box" id="s5"></div>
+        <div class="story-note" id="s5note"></div>
+      </div>
+
+      <!-- 6: QUIZ -->
+      <div class="step-card full">
+        <div class="step-head"><div class="step-num n6">6</div><div class="step-label">Quiz Rapide 🆕</div></div>
+        <div class="step-title">اختبر نفسك</div>
+        <div class="quiz-q" id="qQ"></div>
+        <div class="q-opts" id="qOpts"></div>
+        <div class="q-fb" id="qFb"></div>
+        <button class="q-next" id="qNext" onclick="nextQ()">Question suivante →</button>
+        <div class="q-score" id="qScore"></div>
+      </div>
+
+    </div>
+
+    <!-- MEMORY -->
+    <div class="memory-card">
+      <div class="mem-head">💡 Astuce Mémoire — لا تنسى أبداً</div>
+      <div class="mem-tip" id="memTip"></div>
+      <div class="mem-anchor" id="memAnchor"></div>
+    </div>
+
+    <!-- SAVE -->
+    <div class="save-wrap">
+      <button class="save-btn" id="saveBtn" onclick="saveWord()">
+        <span id="saveIco">🔖</span> <span id="saveTxt">حفظ في مكتبتي</span>
+      </button>
+    </div>
+
+  </div>
+</main>
+
+<script>
+/* ══════════════════════════════
+   FRENCH BACKGROUND CANVAS
+══════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  // French symbols as text/emoji
+  const symbols = [
+    { t:'🗼', s:80 },  // Eiffel Tower
+    { t:'🥐', s:55 },  // Croissant
+    { t:'🍷', s:55 },  // Wine
+    { t:'🧀', s:55 },  // Cheese
+    { t:'🎨', s:55 },  // Art
+    { t:'🌹', s:50 },  // Rose
+    { t:'⚜️', s:60 }, // Fleur-de-lis
+    { t:'🥖', s:50 },  // Baguette
+    { t:'🎭', s:50 },  // Theatre
+    { t:'🏛️', s:55 }, // Museum/Louvre
+    { t:'🎻', s:50 },  // Music
+    { t:'🌟', s:40 },
+  ];
+
+  let items = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    items = [];
+    const count = Math.floor((W * H) / 28000);
+    for (let i = 0; i < count; i++) {
+      const sym = symbols[Math.floor(Math.random() * symbols.length)];
+      items.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        s: sym.s * (0.6 + Math.random() * 0.8),
+        t: sym.t,
+        a: 0.3 + Math.random() * 0.7,
+        r: (Math.random() - 0.5) * 0.4,
+        speed: 0.15 + Math.random() * 0.25,
+        drift: (Math.random() - 0.5) * 0.3,
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    items.forEach(it => {
+      ctx.save();
+      ctx.translate(it.x, it.y);
+      ctx.rotate(it.r);
+      ctx.globalAlpha = it.a * 0.55;
+      ctx.font = `${it.s}px serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(it.t, 0, 0);
+      ctx.restore();
+
+      it.y -= it.speed;
+      it.x += it.drift;
+      it.r += 0.0008;
+      if (it.y < -it.s) { it.y = H + it.s; it.x = Math.random() * W; }
+      if (it.x < -it.s) it.x = W + it.s;
+      if (it.x > W + it.s) it.x = -it.s;
+    });
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+/* ══════════════════════════════
+   APP STATE
+══════════════════════════════ */
+let currentData = null;
+let currentLevel = 'A1';
+let quizItems = [], qIdx = 0, qCorrect = 0, qTotal = 0;
+
+const SR = [1,3,7,14,30,90]; // days
+
+function getLib() { try { return JSON.parse(localStorage.getItem('vi_lib2')||'[]'); } catch { return []; } }
+function setLib(l) { localStorage.setItem('vi_lib2', JSON.stringify(l)); }
+
+function updateCount() {
+  const l = getLib();
+  document.getElementById('libCount').textContent = l.length;
+  const now = Date.now();
+  const due = l.filter(w => w.nextReview <= now);
+  const banner = document.getElementById('reviewBanner');
+  if (due.length > 0) {
+    document.getElementById('rbText').textContent = `لديك ${due.length} كلمة تحتاج مراجعة الآن!`;
+    banner.classList.add('show');
+  } else { banner.classList.remove('show'); }
+}
+
+function getMastery(word) {
+  const l = getLib();
+  const found = l.find(w => w.word.toLowerCase() === word.toLowerCase());
+  return found ? found.mastery : 0;
+}
+
+function setLevel(lv, el) {
+  currentLevel = lv;
+  document.querySelectorAll('.level-pill').forEach(p => {
+    p.className = 'level-pill';
+  });
+  el.className = `level-pill active-${lv.toLowerCase()}`;
+}
+
+const LEVEL_COLORS = {
+  A1:'#002395', A2:'#1a6eb5', B1:'#C9A84C', B2:'#c0812a', C1:'#ED2939', C2:'#8b0000'
+};
+
+/* ══ QUIZ ══ */
+function shuffle(a) {
+  const b = [...a];
+  for (let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}
+  return b;
+}
+
+function buildQuiz(d) {
+  const items = [];
+  // Q1: fill blank
+  if (d.exemple_personnel) {
+    const s = d.exemple_personnel.replace(new RegExp(d.word,'gi'),'___');
+    items.push({ q:`Complète : « ${s} »`, correct:d.word, opts:shuffle([d.word,...(d.synonymes||[]).slice(0,3)]).slice(0,4) });
+  }
+  // Q2: definition
+  if (d.definition) {
+    const fakes=['Refuser catégoriquement','Oublier complètement','Répéter sans fin'];
+    const def = d.definition.substring(0,80)+(d.definition.length>80?'…':'');
+    items.push({ q:`Quelle est la définition de "${d.word}" ?`, correct:def, opts:shuffle([def,...fakes.slice(0,3)]) });
+  }
+  // Q3: colloc
+  if (d.collocations?.length) {
+    const c = d.collocations[0];
+    const fakes=[`perdre ${d.word}`,`éviter ${d.word}`,`ignorer le ${d.word}`];
+    items.push({ q:`Comment dit-on "${c.ar}" ?`, correct:c.fr, opts:shuffle([c.fr,...fakes.slice(0,3)]) });
+  }
+  return items;
+}
+
+function renderQuiz() {
+  const qQ = document.getElementById('qQ');
+  const qOpts = document.getElementById('qOpts');
+  const qFb = document.getElementById('qFb');
+  const qNext = document.getElementById('qNext');
+  qFb.className = 'q-fb';
+  qNext.classList.remove('show');
+  if (qIdx >= quizItems.length) {
+    const pct = quizTotal ? Math.round(qCorrect/quizTotal*100) : 0;
+    qQ.textContent = `🎉 انتهى الاختبار! نتيجتك: ${qCorrect}/${quizTotal} (${pct}%)`;
+    qOpts.innerHTML = '';
+    document.getElementById('qScore').textContent = '';
+    updateMastery(pct);
+    return;
+  }
+  const it = quizItems[qIdx];
+  qQ.textContent = it.q;
+  qOpts.innerHTML = '';
+  (it.opts||[]).forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'q-opt'; b.textContent = opt;
+    b.onclick = () => checkQ(b, opt, it.correct, qOpts);
+    qOpts.appendChild(b);
+  });
+  document.getElementById('qScore').textContent = `السؤال ${qIdx+1} من ${quizItems.length}`;
+}
+
+function checkQ(btn, chosen, correct, opts) {
+  qTotal++;
+  opts.querySelectorAll('.q-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('ok');
+  });
+  const fb = document.getElementById('qFb');
+  if (chosen === correct) {
+    qCorrect++; btn.classList.add('ok');
+    fb.textContent = '✅ ممتاز! إجابة صحيحة'; fb.className = 'q-fb ok';
+  } else {
+    btn.classList.add('no');
+    fb.textContent = `❌ الإجابة: ${correct}`; fb.className = 'q-fb no';
+  }
+  document.getElementById('qNext').classList.add('show');
+}
+
+function nextQ() { qIdx++; renderQuiz(); }
+
+function updateMastery(score) {
+  if (!currentData) return;
+  const lib = getLib();
+  const idx = lib.findIndex(w => w.word.toLowerCase() === currentData.word.toLowerCase());
+  let nm = score;
+  if (idx >= 0) {
+    nm = Math.min(100, Math.round((lib[idx].mastery + score)/2));
+    lib[idx].mastery = nm;
+    const srIdx = Math.min(Math.floor(nm/17), SR.length-1);
+    lib[idx].nextReview = Date.now() + SR[srIdx]*86400000;
+    lib[idx].reviewCount = (lib[idx].reviewCount||0)+1;
+    setLib(lib);
+  }
+  document.getElementById('mastPct').textContent = nm+'%';
+  document.getElementById('mastBar').style.width = nm+'%';
+  updateCount();
+}
+
+/* ══ SAVE ══ */
+function saveWord() {
+  if (!currentData) return;
+  const lib = getLib();
+  const idx = lib.findIndex(w => w.word.toLowerCase() === currentData.word.toLowerCase());
+  if (idx >= 0) {
+    lib[idx].mastery = Math.min(100, lib[idx].mastery+20);
+    lib[idx].nextReview = Date.now() + SR[Math.min(Math.floor(lib[idx].mastery/17),SR.length-1)]*86400000;
+    setLib(lib);
+    document.getElementById('saveIco').textContent='✅';
+    document.getElementById('saveTxt').textContent='تمت المراجعة (+20%)';
+    document.getElementById('saveBtn').classList.add('saved');
+  } else {
+    lib.push({ word:currentData.word, class:currentData.class, definition:currentData.definition, mastery:20, savedAt:Date.now(), nextReview:Date.now()+SR[0]*86400000, reviewCount:0, level:currentLevel });
+    setLib(lib);
+    document.getElementById('saveIco').textContent='✅';
+    document.getElementById('saveTxt').textContent='محفوظ!';
+    document.getElementById('saveBtn').classList.add('saved');
+  }
+  updateCount();
+}
+
+/* ══ LIBRARY ══ */
+function openLib() {
+  const lib = getLib();
+  const body = document.getElementById('libBody');
+  const empty = document.getElementById('libEmpty');
+  const rBtn = document.getElementById('libReviewBtn');
+  const now = Date.now();
+  if (!lib.length) { empty.style.display='block'; rBtn.style.display='none'; body.innerHTML=''; body.appendChild(empty); }
+  else {
+    empty.style.display='none'; rBtn.style.display='block';
+    body.innerHTML='';
+    const sorted = [...lib].sort((a,b)=>(a.nextReview||0)-(b.nextReview||0));
+    sorted.forEach(w => {
+      const due = w.nextReview <= now;
+      const pc = w.mastery||0;
+      const pillC = pc>=70?'mp-high':pc>=40?'mp-mid':'mp-low';
+      const el = document.createElement('div');
+      el.className='lib-item';
+      el.innerHTML=`
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <div class="li-word">${w.word}</div>
+            ${w.level?`<span style="font-size:0.66rem;background:${LEVEL_COLORS[w.level]||'#333'};color:white;border-radius:5px;padding:1px 7px;font-weight:700;">${w.level}</span>`:''}
+          </div>
+          <div class="li-def">${(w.definition||'').substring(0,52)}…</div>
+          ${due?'<span class="li-due">⏰ مراجعة مستحقة</span>':''}
+        </div>
+        <span class="mastery-pill ${pillC}">${pc}%</span>`;
+      el.onclick = () => { closeLib(); qs(w.word); };
+      body.appendChild(el);
+    });
+  }
+  document.getElementById('libPanel').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeLib() {
+  document.getElementById('libPanel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function reviewDue() {
+  closeLib();
+  const lib = getLib();
+  const due = lib.filter(w => w.nextReview <= Date.now());
+  if (due.length) qs(due[0].word);
+}
+
+/* ══ SEARCH ══ */
+function qs(w) { document.getElementById('wordInput').value=w; go(); }
+document.getElementById('wordInput').addEventListener('keydown', e => { if(e.key==='Enter') go(); });
+
+async function go() {
+  const word = document.getElementById('wordInput').value.trim();
+  if (!word) return;
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  document.getElementById('loadingTxt').textContent = `Analyse de "${word}" (niveau ${currentLevel})…`;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('errMsg').classList.remove('show');
+
+  const prompt = `Tu es un expert en pédagogie du FLE (Français Langue Étrangère). Analyse le mot français "${word}" pour un apprenant de niveau ${currentLevel}.
+
+Réponds UNIQUEMENT avec JSON valide (sans backticks):
+
+{
+  "word": "${word}",
+  "phonetic": "transcription IPA entre //",
+  "class": "catégorie (ex: verbe tr., nom m., adjectif…)",
+  "level": "${currentLevel}",
+  "visual_description": "Image mentale vivante et mémorable pour ce mot (2-3 phrases). Décris une scène concrète.",
+  "definition": "Définition Larousse adaptée au niveau ${currentLevel} (1-2 phrases)",
+  "synonymes": ["syn1","syn2","syn3"],
+  "antonymes": ["ant1","ant2"],
+  "collocations": [
+    {"fr":"[mot] + expression naturelle 1","ar":"الترجمة"},
+    {"fr":"[mot] + expression 2","ar":"الترجمة"},
+    {"fr":"[mot] + expression 3","ar":"الترجمة"},
+    {"fr":"[mot] + expression 4","ar":"الترجمة"}
+  ],
+  "exemple_personnel": "Phrase française niveau ${currentLevel} dans le contexte d'un étudiant algérien (études, trading, vie quotidienne)",
+  "exemple_contexte": "Explication du contexte en arabe (1 phrase)",
+  "mini_story": "Histoire courte 3-4 phrases niveau ${currentLevel} où le mot apparaît naturellement. Engageante et mémorable. Le mot exact doit y figurer.",
+  "story_note": "Pourquoi cette histoire aide à mémoriser (en arabe, court)",
+  "memory_tip": "Astuce mnémotechnique créative et originale (en arabe ou mixte)",
+  "memory_anchor": "Mot-ancre arabe ou image forte très courte"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1300, messages:[{role:'user',content:prompt}] })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(b=>b.text||'').join('');
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const d = JSON.parse(clean);
+    render(d);
+  } catch(e) {
+    document.getElementById('loading').classList.remove('show');
+    const em = document.getElementById('errMsg');
+    em.textContent = 'خطأ في التحليل. تأكد من الاتصال وحاول مرة أخرى.';
+    em.classList.add('show');
+    console.error(e);
+  }
+  btn.disabled = false;
+}
+
+function render(d) {
+  currentData = d;
+  quizItems = buildQuiz(d); qIdx=0; qCorrect=0; qTotal=0;
+  document.getElementById('loading').classList.remove('show');
+
+  // Hero
+  document.getElementById('wTitle').textContent = d.word;
+  document.getElementById('wIpa').textContent = d.phonetic||'';
+  document.getElementById('wCat').textContent = d.class||'';
+
+  const lv = d.level||currentLevel;
+  const wlv = document.getElementById('wLevel');
+  wlv.textContent = lv;
+  wlv.style.background = LEVEL_COLORS[lv]||'#333';
+  wlv.style.color = 'white';
+
+  const mastery = getMastery(d.word);
+  document.getElementById('mastPct').textContent = mastery+'%';
+  document.getElementById('mastBar').style.width = mastery+'%';
+
+  // Saved state
+  const lib = getLib();
+  const saved = lib.find(w=>w.word.toLowerCase()===d.word.toLowerCase());
+  const sb = document.getElementById('saveBtn');
+  sb.classList.remove('saved');
+  document.getElementById('saveIco').textContent='🔖';
+  document.getElementById('saveTxt').textContent = saved ? `مراجعة (+20% maîtrise)` : 'حفظ في مكتبتي';
+
+  // Speak
+  document.getElementById('speakBtn').onclick = () => {
+    const u = new SpeechSynthesisUtterance(d.word);
+    u.lang='fr-FR'; u.rate=0.8; speechSynthesis.speak(u);
+  };
+
+  // S1
+  document.getElementById('s1').textContent = d.visual_description||'';
+  const il = document.getElementById('imgLink');
+  il.href = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(d.word+' illustration')}`;
+  document.getElementById('imgTxt').textContent = `Voir "${d.word}" sur Google Images →`;
+
+  // S2
+  document.getElementById('s2def').textContent = d.definition||'';
+  document.getElementById('synTags').innerHTML = (d.synonymes||[]).map(s=>`<span class="tag tag-syn">${s}</span>`).join('');
+  document.getElementById('antTags').innerHTML = (d.antonymes||[]).map(a=>`<span class="tag tag-ant">${a}</span>`).join('');
+  document.getElementById('antBlock').style.display = d.antonymes?.length?'':'none';
+
+  // S3
+  document.getElementById('s3').innerHTML = (d.collocations||[]).map(c=>`
+    <div class="colloc-row"><span class="cf">${c.fr}</span><span class="ca">${c.ar}</span></div>`).join('');
+
+  // S4
+  document.getElementById('s4').innerHTML = `
+    <div class="ex-quote">"${d.exemple_personnel}"</div>
+    <div class="ex-note">📍 ${d.exemple_contexte}</div>`;
+
+  // S5 story — highlight word
+  const storyHtml = (d.mini_story||'').replace(
+    new RegExp(`(${d.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),
+    '<span class="story-word">$1</span>'
+  );
+  document.getElementById('s5').innerHTML = storyHtml;
+  document.getElementById('s5note').textContent = d.story_note?`💬 ${d.story_note}`:'';
+
+  // Quiz
+  renderQuiz();
+
+  // Memory
+  document.getElementById('memTip').textContent = d.memory_tip||'';
+  document.getElementById('memAnchor').textContent = `الكلمة المرساة: ${d.memory_anchor||''}`;
+
+  document.getElementById('result').classList.add('show');
+  setTimeout(()=>document.getElementById('result').scrollIntoView({behavior:'smooth',block:'start'}),80);
+  updateCount();
+}
+
+// INIT
+updateCount();
+</script>
+</body>
+</html>
